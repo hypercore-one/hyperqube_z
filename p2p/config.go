@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	DefaultNodeName = "znn-node"
+	DefaultNodeName = "hqz-node"
 
 	DefaultListenHost = "0.0.0.0"
 	DefaultListenPort = 35995
