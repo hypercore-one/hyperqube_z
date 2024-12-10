@@ -15,8 +15,6 @@ func NewGenesis(config *GenesisConfig) store.Genesis {
 	accountPool := newGenesisAccountBlocks(config)
 	momentumTransaction := newGenesisMomentum(config, accountPool)
 
-	applyHyperQubeConfig(config)
-
 	return &genesis{
 		config:              config,
 		momentumTransaction: momentumTransaction,

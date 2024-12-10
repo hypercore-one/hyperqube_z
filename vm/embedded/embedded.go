@@ -8,6 +8,7 @@ import (
 	cabi "github.com/zenon-network/go-zenon/vm/embedded/definition"
 	"github.com/zenon-network/go-zenon/vm/embedded/implementation"
 	"github.com/zenon-network/go-zenon/vm/vm_context"
+	"golang.org/x/exp/maps"
 )
 
 // Method defines interfaces of embedded contracts
@@ -32,14 +33,14 @@ type embeddedImplementation struct {
 }
 
 var (
-	originEmbedded             = getOrigin()
-	acceleratorEmbedded        = getAccelerator()
-	htlcEmbedded               = getHtlc()
-	bridgeAndLiquidityEmbedded = getBridgeAndLiquidity()
+	originEmbedded                  = getOrigin()
+	acceleratorEmbedded             = getAccelerator()
+	htlcEmbeddedDiffs               = getHtlcDiffs()
+	bridgeAndLiquidityEmbeddedDiffs = getBridgeAndLiquidityDiffs()
 )
 
-func getHtlc() map[types.Address]*embeddedImplementation {
-	contracts := getBridgeAndLiquidity()
+func getHtlcDiffs() map[types.Address]*embeddedImplementation {
+	contracts := make(map[types.Address]*embeddedImplementation)
 	contracts[types.HtlcContract] = &embeddedImplementation{
 		map[string]Method{
 			cabi.CreateHtlcMethodName:           &implementation.CreateHtlcMethod{cabi.CreateHtlcMethodName},
@@ -53,8 +54,8 @@ func getHtlc() map[types.Address]*embeddedImplementation {
 	return contracts
 }
 
-func getBridgeAndLiquidity() map[types.Address]*embeddedImplementation {
-	contracts := getAccelerator()
+func getBridgeAndLiquidityDiffs() map[types.Address]*embeddedImplementation {
+	contracts := make(map[types.Address]*embeddedImplementation)
 	contracts[types.BridgeContract] = &embeddedImplementation{
 		map[string]Method{
 			cabi.WrapTokenMethodName:            &implementation.WrapTokenMethod{cabi.WrapTokenMethodName},
@@ -217,15 +218,27 @@ func GetEmbeddedMethod(context vm_context.AccountVmContext, address types.Addres
 
 	var contractsMap map[types.Address]*embeddedImplementation
 
-	if context.IsHtlcSporkEnforced() {
-		contractsMap = htlcEmbedded
-	} else if context.IsBridgeAndLiquiditySporkEnforced() {
-		contractsMap = bridgeAndLiquidityEmbedded
-	} else if context.IsAcceleratorSporkEnforced() {
+	// changing from fast assignment to doing merges
+	// how often is this called? better to only do once/as needed?
+
+	// the code before assumed a linear activation of sporks
+	// accelerator, bridge-liq, then htlc
+	// here we only assume that accelerator will be activated before either bridge-liq or htlc
+	// this will allow us to activate them independently on hyperqubes
+
+	contractsMap = originEmbedded
+	if context.IsAcceleratorSporkEnforced() {
 		contractsMap = acceleratorEmbedded
-	} else {
-		contractsMap = originEmbedded
 	}
+	if context.IsBridgeAndLiquiditySporkEnforced() {
+		// only adds new embedded contract
+		maps.Copy(contractsMap, bridgeAndLiquidityEmbeddedDiffs)
+	}
+	if context.IsHtlcSporkEnforced() {
+		// only adds new embedded contract
+		maps.Copy(contractsMap, htlcEmbeddedDiffs)
+	}
+	// No change for NoPillarRegSpork
 
 	// contract address must exist in map
 	if p, found := contractsMap[address]; found {
