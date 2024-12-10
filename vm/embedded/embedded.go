@@ -8,7 +8,10 @@ import (
 	cabi "github.com/zenon-network/go-zenon/vm/embedded/definition"
 	"github.com/zenon-network/go-zenon/vm/embedded/implementation"
 	"github.com/zenon-network/go-zenon/vm/vm_context"
-	"golang.org/x/exp/maps"
+)
+
+var (
+	originEmbedded = getOrigin()
 )
 
 // Method defines interfaces of embedded contracts
@@ -32,15 +35,7 @@ type embeddedImplementation struct {
 	abi abi.ABIContract
 }
 
-var (
-	originEmbedded                  = getOrigin()
-	acceleratorEmbedded             = getAccelerator()
-	htlcEmbeddedDiffs               = getHtlcDiffs()
-	bridgeAndLiquidityEmbeddedDiffs = getBridgeAndLiquidityDiffs()
-)
-
-func getHtlcDiffs() map[types.Address]*embeddedImplementation {
-	contracts := make(map[types.Address]*embeddedImplementation)
+func applyHtlcDiffs(contracts map[types.Address]*embeddedImplementation) map[types.Address]*embeddedImplementation {
 	contracts[types.HtlcContract] = &embeddedImplementation{
 		map[string]Method{
 			cabi.CreateHtlcMethodName:           &implementation.CreateHtlcMethod{cabi.CreateHtlcMethodName},
@@ -54,8 +49,7 @@ func getHtlcDiffs() map[types.Address]*embeddedImplementation {
 	return contracts
 }
 
-func getBridgeAndLiquidityDiffs() map[types.Address]*embeddedImplementation {
-	contracts := make(map[types.Address]*embeddedImplementation)
+func applyBridgeAndLiquidityDiffs(contracts map[types.Address]*embeddedImplementation) map[types.Address]*embeddedImplementation {
 	contracts[types.BridgeContract] = &embeddedImplementation{
 		map[string]Method{
 			cabi.WrapTokenMethodName:            &implementation.WrapTokenMethod{cabi.WrapTokenMethodName},
@@ -98,8 +92,7 @@ func getBridgeAndLiquidityDiffs() map[types.Address]*embeddedImplementation {
 	return contracts
 }
 
-func getAccelerator() map[types.Address]*embeddedImplementation {
-	contracts := getOrigin()
+func applyAcceleratorDiffs(contracts map[types.Address]*embeddedImplementation) map[types.Address]*embeddedImplementation {
 	contracts[types.AcceleratorContract] = &embeddedImplementation{
 		map[string]Method{
 			cabi.DonateMethodName:        &implementation.DonateMethod{cabi.DonateMethodName},
@@ -223,20 +216,18 @@ func GetEmbeddedMethod(context vm_context.AccountVmContext, address types.Addres
 
 	// the code before assumed a linear activation of sporks
 	// accelerator, bridge-liq, then htlc
-	// here we only assume that accelerator will be activated before either bridge-liq or htlc
 	// this will allow us to activate them independently on hyperqubes
+	// although other implicit dependencies may exist
 
 	contractsMap = originEmbedded
 	if context.IsAcceleratorSporkEnforced() {
-		contractsMap = acceleratorEmbedded
+		contractsMap = applyAcceleratorDiffs(contractsMap)
 	}
 	if context.IsBridgeAndLiquiditySporkEnforced() {
-		// only adds new embedded contract
-		maps.Copy(contractsMap, bridgeAndLiquidityEmbeddedDiffs)
+		contractsMap = applyBridgeAndLiquidityDiffs(contractsMap)
 	}
 	if context.IsHtlcSporkEnforced() {
-		// only adds new embedded contract
-		maps.Copy(contractsMap, htlcEmbeddedDiffs)
+		contractsMap = applyHtlcDiffs(contractsMap)
 	}
 	// No change for NoPillarRegSpork
 
