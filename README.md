@@ -1,17 +1,15 @@
-# Zenon Node
+# hyperqube_z node
 
-Reference Golang implementation of the Alphanet - Network of Momentum Phase 0.
+HyperCore One meta-implementation of Zenon - Network of Momentum based HyperQubes.
 
 ## Building from source
 
-Building `znnd` requires both a Go (version 1.16 or later) and a C compiler. You can install them using your favourite package manager. Once the dependencies are installed, please run:
+Building `hqzd` requires both a Go (version 1.16 or later) and a C compiler. You can install them using your favourite package manager. Once the dependencies are installed, please run:
 
 ```shell
-make znnd
+make hqzd
 ```
 
-## Running `znnd`
+## Running `hqzd`
 
-Since version `0.0.2`, `znnd` is configured with the Alphanet Genesis and default seeders.
-
-Use [znn-controller](https://github.com/zenon-network/znn_controller_dart) to configure your full node. For more information please consult the [Wiki](https://github.com/zenon-network/znn-wiki).
+Use the [deployment script](https://github.com/hypercore-one/deployment) to configure your full node.

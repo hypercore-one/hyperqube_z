@@ -49,6 +49,8 @@ func ReadGenesisConfigFromFile(genesisFile string) (store.Genesis, error) {
 			}
 		}
 
+		applyHyperQubeConfig(config)
+
 		if err := CheckGenesis(config); err != nil {
 			log.Crit("invalid genesis file", "method", "readGenesis", "reason", err, "genesisFile", genesisFile)
 			return nil, ErrInvalidGenesisConfig

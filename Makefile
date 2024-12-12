@@ -1,4 +1,4 @@
-.PHONY: all clean znnd
+.PHONY: all clean hqzd
 
 GO ?= latest
 
@@ -18,7 +18,7 @@ ifeq ($(detected_OS),Linux)
     EXECUTABLE=libznn.so
 endif
 
-SERVERMAIN = $(shell pwd)/cmd/znnd
+SERVERMAIN = $(shell pwd)/cmd/hqzd
 LIBMAIN = $(shell pwd)/cmd/libznn
 BUILDDIR = $(shell pwd)/build
 GIT_COMMIT=$(shell git rev-parse HEAD)
@@ -30,12 +30,12 @@ $(EXECUTABLE):
 libznn: $(EXECUTABLE) ## Build binaries
 	@echo "Build libznn done."
 
-znnd:
-	go build -o $(BUILDDIR)/znnd $(SERVERMAIN)
-	@echo "Build znnd done."
-	@echo "Run \"$(BUILDDIR)/znnd\" to start znnd."
+hqzd:
+	go build -o $(BUILDDIR)/hqzd $(SERVERMAIN)
+	@echo "Build hqzd done."
+	@echo "Run \"$(BUILDDIR)/hqzd\" to start hqzd."
 
 clean:
 	rm -r $(BUILDDIR)/
 
-all: znnd libznn
+all: hqzd libznn

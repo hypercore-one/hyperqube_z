@@ -63,8 +63,8 @@ func (c *momentumPool) AddMomentumTransaction(insertLocker sync.Locker, transact
 			fmt.Printf("  Spork name `%v`\n", spork.Name)
 		}
 		fmt.Printf("\n")
-		fmt.Printf("Please upgrade your znnd binary\n")
-		fmt.Printf("znnd is terminating\n")
+		fmt.Printf("Please upgrade your hqzd binary\n")
+		fmt.Printf("hqzd is terminating\n")
 		os.Exit(2)
 	} else if justNow != nil {
 		fmt.Printf("\n")

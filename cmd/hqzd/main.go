@@ -6,7 +6,7 @@ import (
 	"github.com/zenon-network/go-zenon/app"
 )
 
-// znnd is the official command-line client
+// hqzd is the hyperqube command-line client
 func main() {
 	app.Run()
 }
