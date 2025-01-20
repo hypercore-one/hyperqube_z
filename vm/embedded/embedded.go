@@ -10,6 +10,10 @@ import (
 	"github.com/zenon-network/go-zenon/vm/vm_context"
 )
 
+var (
+	originEmbedded = getOrigin()
+)
+
 // Method defines interfaces of embedded contracts
 type Method interface {
 	// GetPlasma returns the required plasma to call this Method.
@@ -31,15 +35,7 @@ type embeddedImplementation struct {
 	abi abi.ABIContract
 }
 
-var (
-	originEmbedded             = getOrigin()
-	acceleratorEmbedded        = getAccelerator()
-	htlcEmbedded               = getHtlc()
-	bridgeAndLiquidityEmbedded = getBridgeAndLiquidity()
-)
-
-func getHtlc() map[types.Address]*embeddedImplementation {
-	contracts := getBridgeAndLiquidity()
+func applyHtlcDiffs(contracts map[types.Address]*embeddedImplementation) map[types.Address]*embeddedImplementation {
 	contracts[types.HtlcContract] = &embeddedImplementation{
 		map[string]Method{
 			cabi.CreateHtlcMethodName:           &implementation.CreateHtlcMethod{cabi.CreateHtlcMethodName},
@@ -53,8 +49,7 @@ func getHtlc() map[types.Address]*embeddedImplementation {
 	return contracts
 }
 
-func getBridgeAndLiquidity() map[types.Address]*embeddedImplementation {
-	contracts := getAccelerator()
+func applyBridgeAndLiquidityDiffs(contracts map[types.Address]*embeddedImplementation) map[types.Address]*embeddedImplementation {
 	contracts[types.BridgeContract] = &embeddedImplementation{
 		map[string]Method{
 			cabi.WrapTokenMethodName:            &implementation.WrapTokenMethod{cabi.WrapTokenMethodName},
@@ -97,8 +92,7 @@ func getBridgeAndLiquidity() map[types.Address]*embeddedImplementation {
 	return contracts
 }
 
-func getAccelerator() map[types.Address]*embeddedImplementation {
-	contracts := getOrigin()
+func applyAcceleratorDiffs(contracts map[types.Address]*embeddedImplementation) map[types.Address]*embeddedImplementation {
 	contracts[types.AcceleratorContract] = &embeddedImplementation{
 		map[string]Method{
 			cabi.DonateMethodName:        &implementation.DonateMethod{cabi.DonateMethodName},
@@ -217,15 +211,25 @@ func GetEmbeddedMethod(context vm_context.AccountVmContext, address types.Addres
 
 	var contractsMap map[types.Address]*embeddedImplementation
 
-	if context.IsHtlcSporkEnforced() {
-		contractsMap = htlcEmbedded
-	} else if context.IsBridgeAndLiquiditySporkEnforced() {
-		contractsMap = bridgeAndLiquidityEmbedded
-	} else if context.IsAcceleratorSporkEnforced() {
-		contractsMap = acceleratorEmbedded
-	} else {
-		contractsMap = originEmbedded
+	// changing from fast assignment to doing merges
+	// how often is this called? better to only do once/as needed?
+
+	// the code before assumed a linear activation of sporks
+	// accelerator, bridge-liq, then htlc
+	// this will allow us to activate them independently on hyperqubes
+	// although other implicit dependencies may exist
+
+	contractsMap = originEmbedded
+	if context.IsAcceleratorSporkEnforced() {
+		contractsMap = applyAcceleratorDiffs(contractsMap)
 	}
+	if context.IsBridgeAndLiquiditySporkEnforced() {
+		contractsMap = applyBridgeAndLiquidityDiffs(contractsMap)
+	}
+	if context.IsHtlcSporkEnforced() {
+		contractsMap = applyHtlcDiffs(contractsMap)
+	}
+	// No change for NoPillarRegSpork
 
 	// contract address must exist in map
 	if p, found := contractsMap[address]; found {

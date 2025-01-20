@@ -36,9 +36,9 @@ func MakeConfig(ctx *cli.Context) (*node.Config, error) {
 
 	// 5: Log config
 	if j, err := json.MarshalIndent(cfg, "", "    "); err == nil {
-		fmt.Printf("Using the following znnd config: %v\n", string(j))
+		fmt.Printf("Using the following hqzd config: %v\n", string(j))
 	}
-	log.Info("using znnd config", "config", cfg)
+	log.Info("using hqzd config", "config", cfg)
 
 	return &cfg, nil
 }

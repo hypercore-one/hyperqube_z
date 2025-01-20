@@ -75,8 +75,8 @@ func (c *chain) Init() error {
 			fmt.Printf("  Spork name `%v` id:`%v`\n", spork.Name, spork.Id)
 		}
 		fmt.Printf("\n")
-		fmt.Printf("Please upgrade your znnd binary\n")
-		fmt.Printf("znnd is terminating\n")
+		fmt.Printf("Please upgrade your hqzd binary\n")
+		fmt.Printf("hqzd is terminating\n")
 		os.Exit(2)
 	}
 

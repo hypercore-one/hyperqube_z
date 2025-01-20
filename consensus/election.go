@@ -10,6 +10,7 @@ import (
 	"github.com/zenon-network/go-zenon/common"
 	"github.com/zenon-network/go-zenon/common/types"
 	"github.com/zenon-network/go-zenon/consensus/storage"
+	"github.com/zenon-network/go-zenon/vm/constants"
 )
 
 var (
@@ -213,6 +214,16 @@ func (em *electionManager) DeleteMomentum(*nom.DetailedMomentum) {
 
 func newElectionManager(chain chain.Chain, db *storage.DB) *electionManager {
 	context := NewConsensusContext(*chain.GetGenesisMomentum().Timestamp)
+	if constants.ConsensusConfig.Algorithm == constants.UNIFORM {
+		return &electionManager{
+			Context: *context,
+			chain:   chain,
+			algo:    NewUniformElectionAlgorithm(context),
+			db:      db,
+			log:     common.ConsensusLogger.New("submodule", "uniform-election-manager"),
+		}
+
+	}
 	return &electionManager{
 		Context: *context,
 		chain:   chain,

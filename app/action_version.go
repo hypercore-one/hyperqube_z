@@ -21,7 +21,7 @@ var (
 )
 
 func versionAction(*cli.Context) error {
-	fmt.Printf(`znnd
+	fmt.Printf(`hqzd
 Version:%v
 Architecture:%v
 Go Version:%v
