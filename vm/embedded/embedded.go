@@ -10,10 +10,6 @@ import (
 	"github.com/zenon-network/go-zenon/vm/vm_context"
 )
 
-var (
-	originEmbedded = getOrigin()
-)
-
 // Method defines interfaces of embedded contracts
 type Method interface {
 	// GetPlasma returns the required plasma to call this Method.
@@ -35,7 +31,7 @@ type embeddedImplementation struct {
 	abi abi.ABIContract
 }
 
-func applyHtlcDiffs(contracts map[types.Address]*embeddedImplementation) map[types.Address]*embeddedImplementation {
+func applyHtlcDiffs(contracts map[types.Address]*embeddedImplementation) {
 	contracts[types.HtlcContract] = &embeddedImplementation{
 		map[string]Method{
 			cabi.CreateHtlcMethodName:           &implementation.CreateHtlcMethod{cabi.CreateHtlcMethodName},
@@ -46,10 +42,9 @@ func applyHtlcDiffs(contracts map[types.Address]*embeddedImplementation) map[typ
 		},
 		cabi.ABIHtlc,
 	}
-	return contracts
 }
 
-func applyBridgeAndLiquidityDiffs(contracts map[types.Address]*embeddedImplementation) map[types.Address]*embeddedImplementation {
+func applyBridgeAndLiquidityDiffs(contracts map[types.Address]*embeddedImplementation) {
 	contracts[types.BridgeContract] = &embeddedImplementation{
 		map[string]Method{
 			cabi.WrapTokenMethodName:            &implementation.WrapTokenMethod{cabi.WrapTokenMethodName},
@@ -88,11 +83,9 @@ func applyBridgeAndLiquidityDiffs(contracts map[types.Address]*embeddedImplement
 	contracts[types.LiquidityContract].m[cabi.ProposeAdministratorMethodName] = &implementation.ProposeAdministratorLiquidity{cabi.ProposeAdministratorMethodName}
 	contracts[types.LiquidityContract].m[cabi.NominateGuardiansMethodName] = &implementation.NominateGuardiansLiquidity{cabi.NominateGuardiansMethodName}
 	contracts[types.LiquidityContract].m[cabi.EmergencyMethodName] = &implementation.EmergencyLiquidity{cabi.EmergencyMethodName}
-
-	return contracts
 }
 
-func applyAcceleratorDiffs(contracts map[types.Address]*embeddedImplementation) map[types.Address]*embeddedImplementation {
+func applyAcceleratorDiffs(contracts map[types.Address]*embeddedImplementation) {
 	contracts[types.AcceleratorContract] = &embeddedImplementation{
 		map[string]Method{
 			cabi.DonateMethodName:        &implementation.DonateMethod{cabi.DonateMethodName},
@@ -111,8 +104,6 @@ func applyAcceleratorDiffs(contracts map[types.Address]*embeddedImplementation) 
 	contracts[types.StakeContract].m[cabi.CollectRewardMethodName] = &implementation.CollectRewardMethod{cabi.CollectRewardMethodName, constants.AlphanetPlasmaTable.EmbeddedSimple}
 	contracts[types.LiquidityContract].m[cabi.FundMethodName] = &implementation.FundMethod{cabi.FundMethodName}
 	contracts[types.LiquidityContract].m[cabi.BurnZnnMethodName] = &implementation.BurnZnnMethod{cabi.BurnZnnMethodName}
-
-	return contracts
 }
 
 func getOrigin() map[types.Address]*embeddedImplementation {
@@ -209,8 +200,6 @@ func GetEmbeddedMethod(context vm_context.AccountVmContext, address types.Addres
 		return nil, constants.ErrNotContractAddress
 	}
 
-	var contractsMap map[types.Address]*embeddedImplementation
-
 	// changing from fast assignment to doing merges
 	// how often is this called? better to only do once/as needed?
 
@@ -219,15 +208,15 @@ func GetEmbeddedMethod(context vm_context.AccountVmContext, address types.Addres
 	// this will allow us to activate them independently on hyperqubes
 	// although other implicit dependencies may exist
 
-	contractsMap = originEmbedded
+	contractsMap := getOrigin()
 	if context.IsAcceleratorSporkEnforced() {
-		contractsMap = applyAcceleratorDiffs(contractsMap)
+		applyAcceleratorDiffs(contractsMap)
 	}
 	if context.IsBridgeAndLiquiditySporkEnforced() {
-		contractsMap = applyBridgeAndLiquidityDiffs(contractsMap)
+		applyBridgeAndLiquidityDiffs(contractsMap)
 	}
 	if context.IsHtlcSporkEnforced() {
-		contractsMap = applyHtlcDiffs(contractsMap)
+		applyHtlcDiffs(contractsMap)
 	}
 	// No change for NoPillarRegSpork
 
