@@ -36,6 +36,9 @@ var (
 	EmbeddedWUpdate   = []Address{PillarContract, StakeContract, SentinelContract, LiquidityContract, AcceleratorContract}
 
 	SporkAddress *Address
+
+	// TODO: Update governance address to governance contract
+	GovernanceAddress = ParseAddressPanic("z1qzal6c5s9rjnnxd2z7dvdhjxpmmj4fmw56a0mz")
 )
 
 func IsEmbeddedAddress(addr Address) bool {
