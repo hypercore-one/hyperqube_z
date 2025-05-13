@@ -31,6 +31,17 @@ type embeddedImplementation struct {
 	abi abi.ABIContract
 }
 
+func applyDynamicPlasmaDiffs(contracts map[types.Address]*embeddedImplementation) {
+	contracts[types.PlasmaContract] = &embeddedImplementation{
+		map[string]Method{
+			cabi.FuseMethodName:         &implementation.FuseMethod{cabi.FuseMethodName},
+			cabi.CancelFuseMethodName:   &implementation.CancelFuseMethod{cabi.CancelFuseMethodName},
+			cabi.SetVariablesMethodName: &implementation.SetVariablesMethod{cabi.SetVariablesMethodName},
+		},
+		cabi.ABIPlasma,
+	}
+}
+
 func applyHtlcDiffs(contracts map[types.Address]*embeddedImplementation) {
 	contracts[types.HtlcContract] = &embeddedImplementation{
 		map[string]Method{
@@ -217,6 +228,9 @@ func GetEmbeddedMethod(context vm_context.AccountVmContext, address types.Addres
 	}
 	if context.IsHtlcSporkEnforced() {
 		applyHtlcDiffs(contractsMap)
+	}
+	if context.IsDynamicPlasmaSporkEnforced() {
+		applyDynamicPlasmaDiffs(contractsMap)
 	}
 	// No change for NoPillarRegSpork
 
