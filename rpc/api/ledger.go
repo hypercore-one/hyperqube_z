@@ -396,3 +396,17 @@ func (l *LedgerApi) GetDetailedMomentumsByHeight(height, count uint64) (*Detaile
 	}
 	return momentumListToDetailedList(l.chain, ans)
 }
+
+type LedgerMetaResponse struct {
+	ChainId uint64                   `json:"chainId"`
+	ZToken  types.ZenonTokenStandard `json:"zToken"`
+	QToken  types.ZenonTokenStandard `json:"qToken"`
+}
+
+func (l *LedgerApi) Meta() (*LedgerMetaResponse, error) {
+	return &LedgerMetaResponse{
+		ChainId: l.chain.ChainIdentifier(),
+		ZToken:  types.ZnnTokenStandard,
+		QToken:  types.QsrTokenStandard,
+	}, nil
+}

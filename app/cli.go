@@ -33,7 +33,7 @@ func Run() {
 func Stop() {
 	err := nodeManager.Stop()
 	common.DealWithErr(err)
-	fmt.Println("znnd successfully stopped")
+	fmt.Println("hqzd successfully stopped")
 }
 
 func init() {
@@ -48,7 +48,7 @@ func init() {
 		},
 	}
 	app.Copyright = "Copyright 2021, Zenon"
-	app.Usage = "znnd Node"
+	app.Usage = "hqzd Node"
 
 	//Import: Please add the New command here
 	app.Commands = []*cli.Command{
@@ -66,11 +66,11 @@ func init() {
 func beforeAction(ctx *cli.Context) error {
 
 	max := runtime.NumCPU()
-	fmt.Printf("Starting znnd.\n")
+	fmt.Printf("Starting hqzd.\n")
 	fmt.Printf("current time is %v\n", time.Now().Format("2006-01-02 15:04:05"))
 	fmt.Printf("version: %v\n", metadata.Version)
 	fmt.Printf("git-commit-hash: %v\n", metadata.GitCommit)
-	fmt.Printf("znnd will use at most %v cpu-cores\n", max)
+	fmt.Printf("hqzd will use at most %v cpu-cores\n", max)
 	runtime.GOMAXPROCS(max)
 
 	// pprof server

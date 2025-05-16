@@ -173,6 +173,10 @@ func (p *RegisterMethod) ReceiveBlock(context vm_context.AccountVmContext, sendB
 		return nil, err
 	}
 
+	if context.IsNoPillarRegSporkEnforced() {
+		return nil, constants.ErrPermissionDenied
+	}
+
 	param := new(definition.RegisterParam)
 	err := definition.ABIPillars.UnpackMethod(param, p.MethodName, sendBlock.Data)
 	common.DealWithErr(err)

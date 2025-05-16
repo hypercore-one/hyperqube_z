@@ -39,13 +39,13 @@ func NewNodeManager(ctx *cli.Context) (*Manager, error) {
 
 func (nodeManager *Manager) Start() error {
 	// Start up the node
-	log.Info("starting znnd")
+	log.Info("starting hqzd")
 	if err := nodeManager.node.Start(); err != nil {
 		fmt.Printf("failed to start node; reason:%v\n", err)
 		log.Crit("failed to start node", "reason", err)
 		os.Exit(1)
 	} else {
-		fmt.Println("znnd successfully started")
+		fmt.Println("hqzd successfully started")
 		fmt.Println("*** Node status ***")
 		address := nodeManager.node.Zenon().Producer().GetCoinBase()
 		if address == nil {
@@ -58,7 +58,7 @@ func (nodeManager *Manager) Start() error {
 	return nil
 }
 func (nodeManager *Manager) Stop() error {
-	log.Warn("Stopping znnd ...")
+	log.Warn("Stopping hqzd ...")
 
 	if err := nodeManager.node.Stop(); err != nil {
 		log.Error("Failed to stop node", "reason", err)
