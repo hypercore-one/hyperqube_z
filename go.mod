@@ -21,7 +21,6 @@ require (
 	github.com/tyler-smith/go-bip39 v1.1.0
 	github.com/urfave/cli/v2 v2.27.6
 	golang.org/x/crypto v0.38.0
-	golang.org/x/exp v0.0.0-20230626212559-97b1e661b5df
 	google.golang.org/protobuf v1.36.6
 	gopkg.in/karalabe/cookiejar.v2 v2.0.0-20150724131613-8dcd6a7f4951
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1
@@ -29,8 +28,6 @@ require (
 )
 
 require (
-	github.com/BurntSushi/toml v1.4.0 // indirect
-	github.com/btcsuite/btcd/btcec/v2 v2.3.4 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.7 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.4.0 // indirect
@@ -38,6 +35,7 @@ require (
 	github.com/go-ole/go-ole v1.3.0 // indirect
 	github.com/go-stack/stack v1.8.1 // indirect
 	github.com/golang/snappy v1.0.0 // indirect
+	github.com/google/go-cmp v0.5.8 // indirect
 	github.com/holiman/uint256 v1.3.2 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
