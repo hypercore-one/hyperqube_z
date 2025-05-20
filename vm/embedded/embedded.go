@@ -34,9 +34,9 @@ type embeddedImplementation struct {
 func applyDynamicPlasmaDiffs(contracts map[types.Address]*embeddedImplementation) {
 	contracts[types.PlasmaContract] = &embeddedImplementation{
 		map[string]Method{
-			cabi.FuseMethodName:         &implementation.FuseMethod{cabi.FuseMethodName},
-			cabi.CancelFuseMethodName:   &implementation.CancelFuseMethod{cabi.CancelFuseMethodName},
-			cabi.SetVariablesMethodName: &implementation.SetVariablesMethod{cabi.SetVariablesMethodName},
+			cabi.FuseMethodName:         &implementation.FuseMethod{MethodName: cabi.FuseMethodName},
+			cabi.CancelFuseMethodName:   &implementation.CancelFuseMethod{MethodName: cabi.CancelFuseMethodName},
+			cabi.SetVariablesMethodName: &implementation.SetVariablesMethod{MethodName: cabi.SetVariablesMethodName},
 		},
 		cabi.ABIPlasma,
 	}
