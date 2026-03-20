@@ -77,6 +77,8 @@ var (
 	fusionInfoKeyPrefix  = []byte{1}
 	fusedAmountKeyPrefix = []byte{2}
 	variablesKeyPrefix   = []byte{3}
+
+	FusedAmountKeyPrefix = fusedAmountKeyPrefix
 )
 
 type FusionInfo struct {

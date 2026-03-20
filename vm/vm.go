@@ -57,9 +57,9 @@ func enoughPlasma(context vm_context.AccountVmContext, block *nom.AccountBlock) 
 	var available uint64
 	var err error
 	if context.IsDynamicPlasmaSporkEnforced() {
-		available, err = AvailablePlasmaV2(context.MomentumStore(), context)
+		available, err = AvailablePlasmaV2(context.CacheStore(), context)
 	} else {
-		available, err = AvailablePlasma(context.MomentumStore(), context)
+		available, err = AvailablePlasma(context.CacheStore(), context)
 	}
 	common.DealWithErr(err)
 	if available < block.FusedPlasma {

@@ -88,13 +88,13 @@ func AvailablePlasma(cache store.Cache, account store.Account) (uint64, error) {
 }
 
 // V2 was introduced with the Dynamic Plasma spork
-func AvailablePlasmaV2(momentum store.Momentum, account store.Account) (uint64, error) {
+func AvailablePlasmaV2(cache store.Cache, account store.Account) (uint64, error) {
 	address := *account.Address()
-	committed, err := momentum.GetAccountStore(address).GetChainPlasma()
+	committed, err := cache.GetChainPlasma(address)
 	if err != nil {
 		return 0, err
 	}
-	fused, err := momentum.GetStakeBeneficialAmount(address)
+	fused, err := cache.GetStakeBeneficialAmount(address)
 	if err != nil {
 		return 0, err
 	}

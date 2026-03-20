@@ -181,13 +181,13 @@ func (a *PlasmaApi) Get(address types.Address) (*PlasmaInfo, error) {
 	var maxPlasma uint64
 
 	if context.IsDynamicPlasmaSporkEnforced() {
-		availablePlasma, err = vm.AvailablePlasmaV2(context.MomentumStore(), context)
+		availablePlasma, err = vm.AvailablePlasmaV2(context.CacheStore(), context)
 		if err != nil {
 			return nil, err
 		}
 		maxPlasma = dp.FusedAmountToPlasma(amount)
 	} else {
-		availablePlasma, err = vm.AvailablePlasma(context.MomentumStore(), context)
+		availablePlasma, err = vm.AvailablePlasma(context.CacheStore(), context)
 		if err != nil {
 			return nil, err
 		}
@@ -275,13 +275,13 @@ func (a *PlasmaApi) GetRequiredPoWForAccountBlock(param GetRequiredParam) (*GetR
 	var requiredFusedPlasma uint64
 
 	if context.IsDynamicPlasmaSporkEnforced() {
-		availablePlasma, err = vm.AvailablePlasmaV2(context.MomentumStore(), context)
+		availablePlasma, err = vm.AvailablePlasmaV2(context.CacheStore(), context)
 		if err != nil {
 			return nil, err
 		}
 		requiredFusedPlasma = basePlasma * frontierMomentum.NextFusionPrice / dp.PriceScaleFactor
 	} else {
-		availablePlasma, err = vm.AvailablePlasma(context.MomentumStore(), context)
+		availablePlasma, err = vm.AvailablePlasma(context.CacheStore(), context)
 		if err != nil {
 			return nil, err
 		}

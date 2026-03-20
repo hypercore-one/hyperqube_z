@@ -38,6 +38,8 @@ var (
 
 	SporkAddress *Address
 
+	GovernanceAddress = GovernanceContract
+
 	// The community spork address is used as a temporary spork address
 	// until an embedded governance contract is taken into use.
 	// The address belongs to Mariposa01 pillar.
