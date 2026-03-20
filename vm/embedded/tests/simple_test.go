@@ -389,55 +389,34 @@ func TestSimple_MomentumContent(t *testing.T) {
 	}
 }
 
-// Test that an address cannot receive a send block that it is not the receiver of
-func TestSendBlockReceiver(t *testing.T) {
+// Test that the amount of uncommitted account-blocks that can be added to the account pool
+// per account is limited by MaxUncommittedBlocksPerAccount.
+func TestSimple_MaxUncommittedAccountBlocks(t *testing.T) {
+	chain.MaxUncommittedBlocksPerAccount = 5
+
 	z := mock.NewMockZenon(t)
 	defer z.StopPanic()
 	ledgerApi := api.NewLedgerApi(z)
 
-	verifier.ReceiverMismatchEnforcementHeight = 10
+	defer z.SaveLogs(common.ZenonLogger).HideHashes().Equals(t, `
+t=2001-09-09T01:46:40+0000 lvl=info msg="inserted block" module=zenon identifier="{Address:z1qzal6c5s9rjnnxd2z7dvdhjxpmmj4fmw56a0mz HashHeight:{Hash:XXXHASHXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Height:2}}"
+t=2001-09-09T01:46:40+0000 lvl=info msg="inserted block" module=zenon identifier="{Address:z1qzal6c5s9rjnnxd2z7dvdhjxpmmj4fmw56a0mz HashHeight:{Hash:XXXHASHXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Height:3}}"
+t=2001-09-09T01:46:40+0000 lvl=info msg="inserted block" module=zenon identifier="{Address:z1qzal6c5s9rjnnxd2z7dvdhjxpmmj4fmw56a0mz HashHeight:{Hash:XXXHASHXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Height:4}}"
+t=2001-09-09T01:46:40+0000 lvl=info msg="inserted block" module=zenon identifier="{Address:z1qzal6c5s9rjnnxd2z7dvdhjxpmmj4fmw56a0mz HashHeight:{Hash:XXXHASHXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Height:5}}"
+t=2001-09-09T01:46:40+0000 lvl=info msg="failed to insert block" module=zenon reason="failed to insert account-block-transaction reason: max uncommitted blocks per account reached; address:z1qzal6c5s9rjnnxd2z7dvdhjxpmmj4fmw56a0mz" identifier="{Address:z1qzal6c5s9rjnnxd2z7dvdhjxpmmj4fmw56a0mz HashHeight:{Hash:XXXHASHXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Height:6}}"
+t=2001-09-09T01:46:40+0000 lvl=eror msg="failed to insert own account-block." module=zenon reason="failed to insert account-block-transaction reason: max uncommitted blocks per account reached; address:z1qzal6c5s9rjnnxd2z7dvdhjxpmmj4fmw56a0mz"
+`)
 
-	// Send 10k ZNN to user 2
-	ab := &nom.AccountBlock{
-		Address:       g.User1.Address,
-		ToAddress:     g.User2.Address,
-		TokenStandard: types.ZnnTokenStandard,
-		Amount:        big.NewInt(10000 * g.Zexp),
+	for i := 0; i < int(chain.MaxUncommittedBlocksPerAccount); i += 1 {
+		z.InsertSendBlock(&nom.AccountBlock{
+			Address:       g.User1.Address,
+			ToAddress:     g.User2.Address,
+			TokenStandard: types.ZnnTokenStandard,
+			Amount:        big.NewInt(1500 * g.Zexp),
+		}, nil, mock.SkipVmChanges)
 	}
-	z.InsertSendBlock(ab, nil, mock.SkipVmChanges)
-	z.InsertNewMomentum()
 
-	frontierMomentum, err := ledgerApi.GetFrontierMomentum()
+	frontierAccBlock, err := ledgerApi.GetFrontierAccountBlock(g.User1.Address)
 	common.FailIfErr(t, err)
-
-	unreceived, err := ledgerApi.GetUnreceivedBlocksByAddress(g.User2.Address, 0, 1)
-	common.FailIfErr(t, err)
-
-	// User 2 sends receive transaction
-	z.InsertReceiveBlock(unreceived.List[0].Header(), &nom.AccountBlock{
-		Address:              g.User2.Address,
-		MomentumAcknowledged: frontierMomentum.Identifier(),
-	}, nil, mock.SkipVmChanges)
-	z.InsertNewMomentum()
-
-	// User 3 also sends receive transaction even though they are not the
-	// correct receiver -> is accepted before receiver mismatch check is enforced
-	z.InsertReceiveBlock(unreceived.List[0].Header(), &nom.AccountBlock{
-		Address:              g.User3.Address,
-		MomentumAcknowledged: frontierMomentum.Identifier(),
-	}, nil, mock.SkipVmChanges)
-	z.InsertNewMomentum()
-
-	frontierMomentum, err = ledgerApi.GetFrontierMomentum()
-	common.FailIfErr(t, err)
-
-	// Wait until receiver mismatch check is enforced
-	z.InsertMomentumsTo(10)
-
-	// User 4 sends receive transaction after mismatch check is enforced
-	// -> not accepted
-	z.InsertReceiveBlock(unreceived.List[0].Header(), &nom.AccountBlock{
-		Address:              g.User4.Address,
-		MomentumAcknowledged: frontierMomentum.Identifier(),
-	}, verifier.ErrABFromBlockReceiverMismatch, mock.SkipVmChanges)
+	common.Expect(t, frontierAccBlock.Height, 5)
 }

@@ -5,12 +5,15 @@ var (
 	HtlcSpork               = NewImplementedSpork("ceb7e3808ef17ea910adda2f3ab547be4cdfb54de8400ce3683258d06be1354b")
 	BridgeAndLiquiditySpork = NewImplementedSpork("ddd43466769461c5b5d109c639da0f50a7eeb96ad6e7274b1928a35c431d7b1b")
 	NoPillarRegSpork        = NewImplementedSpork("c35c80695e6f1739ce19bd9b31e4a6702335fafd643139eb73b76541be2ca9e4")
+	// TODO: Change spork
+	DynamicPlasmaSpork = NewImplementedSpork("36ab0d2b752bd6e02d07e815ce32d3fe71cf11ee9834dfa0322022734184c8a8")
 
 	ImplementedSporksMap = map[Hash]bool{
 		AcceleratorSpork.SporkId:        true,
 		HtlcSpork.SporkId:               true,
 		BridgeAndLiquiditySpork.SporkId: true,
 		NoPillarRegSpork.SporkId:        true,
+		DynamicPlasmaSpork.SporkId:      true,
 	}
 )
 
